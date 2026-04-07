@@ -176,8 +176,8 @@ function checkAnswer(clickedEl, selectedText) {
 }
 
 function getSafeAmount() {
-    if (currentQuestionIndex >= 10) return "32 000";
-    if (currentQuestionIndex >= 5) return "1 000";
+    if (currentQuestionIndex >= 10) return "32 000"; // Если дошли до 11-го вопроса и проиграли
+    if (currentQuestionIndex >= 5) return "1 000";   // Если дошли до 6-го вопроса и проиграли
     return "0";
 }
 
