@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Кто хочет стать миллионером?</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="clock-overlay" style="display:none;">
+    <div class="clock-content">
+        <h2>Время на раздумья:</h2>
+        <div id="timer">60</div>
+        <button id="skip-timer">Пропустить время</button>
+    </div>
+</div>
+
+<div class="game-container">
+    <aside class="money-list">
+        <ul id="money-scale">
+            <li class="mil">15 <span>1 000 000</span></li>
+            <li>14 <span>500 000</span></li>
+            <li>13 <span>250 000</span></li>
+            <li>12 <span>125 000</span></li>
+            <li>11 <span>64 000</span></li>
+            <li class="safe">10 <span>32 000</span></li>
+            <li>9 <span>16 000</span></li>
+            <li>8 <span>8 000</span></li>
+            <li>7 <span>4 000</span></li>
+            <li>6 <span>2 000</span></li>
+            <li class="safe">5 <span>1 000</span></li>
+            <li>4 <span>500</span></li>
+            <li>3 <span>300</span></li>
+            <li>2 <span>200</span></li>
+            <li>1 <span>100</span></li>
+        </ul>
+    </aside>
+
+    <main class="stage">
+        <div class="lifelines">
+            <div class="lifeline" id="btn-5050">50:50</div>
+
+            <div class="lifeline" id="btn-phone">
+                <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+                    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+            </div>
+            </div>
+
+        <div class="question-area">
+            <div class="diamond-box question">
+                <p id="question-text">Загрузка вопроса...</p>
+            </div>
+
+            <div class="answers-grid" id="answers-container">
+                <div class="diamond-box answer"><span>A:</span> <span class="ans-text"></span></div>
+                <div class="diamond-box answer"><span>B:</span> <span class="ans-text"></span></div>
+                <div class="diamond-box answer"><span>C:</span> <span class="ans-text"></span></div>
+                <div class="diamond-box answer"><span>D:</span> <span class="ans-text"></span></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
