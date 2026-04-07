@@ -64,6 +64,7 @@ let currentQuestionObj = null;
 let is5050Used = false;
 let isPhoneUsed = false;
 let phoneInterval;
+let isAudienceUsed = false;
 
 // Элементы DOM
 const questionEl = document.getElementById("question-text");
@@ -74,6 +75,10 @@ const btnPhone = document.getElementById("btn-phone");
 const clockOverlay = document.getElementById("clock-overlay");
 const timerEl = document.getElementById("timer");
 const skipTimerBtn = document.getElementById("skip-timer");
+
+const btnAudience = document.getElementById("btn-audience");
+const audienceOverlay = document.getElementById("audience-overlay");
+const closeAudienceBtn = document.getElementById("close-audience");
 
 // Инициализация
 window.onload = () => {
@@ -86,6 +91,10 @@ function startNewCycle() {
 }
 
 function startNextGame() {
+    // Внутри function startNextGame() добавьте:
+    isAudienceUsed = false;
+    btnAudience.style.opacity = "1";
+    btnAudience.style.cursor = "pointer";
     currentQuestionIndex = 0;
     is5050Used = false;
     isPhoneUsed = false;
@@ -242,3 +251,70 @@ function closeTimer() {
     clearInterval(phoneInterval);
     clockOverlay.style.display = "none";
 }
+
+// Помощь зала
+btnAudience.onclick = () => {
+    if (isAudienceUsed) return;
+    isAudienceUsed = true;
+
+    // Отключаем кнопку
+    btnAudience.style.opacity = "0.3";
+    btnAudience.style.cursor = "not-allowed";
+
+    // Узнаем, какие ответы сейчас видны (вдруг уже было 50:50)
+    let visibleIndices = [];
+    let correctIdx = -1;
+    
+    answersEls.forEach((el, idx) => {
+        if (el.style.visibility !== "hidden") {
+            visibleIndices.push(idx);
+        }
+        if (currentQuestionObj.options[idx] === currentQuestionObj.answer) {
+            correctIdx = idx;
+        }
+    });
+
+    // Расчет голосов
+    let points = [0, 0, 0, 0];
+    
+    visibleIndices.forEach(idx => {
+        // Базовые случайные очки для всех видимых (от 10 до 50)
+        points[idx] = Math.random() * 40 + 10;
+    });
+    
+    // Существенный, но не гарантированный бонус правильному ответу (от 40 до 70)
+    // Иногда неверный ответ может получить 50 баллов, а правильный (10+40)=50 — будет интрига!
+    points[correctIdx] += 40 + Math.random() * 30; 
+
+    // Нормализуем в проценты (сумма = 100%)
+    let totalPoints = points.reduce((a, b) => a + b, 0);
+    let percentages = points.map(p => Math.round((p / totalPoints) * 100));
+
+    // Корректируем возможную погрешность округления (чтобы ровно 100%)
+    let diff = 100 - percentages.reduce((a, b) => a + b, 0);
+    percentages[correctIdx] += diff;
+
+    // Применяем к графику
+    for (let i = 0; i < 4; i++) {
+        const bar = document.getElementById(`bar-${i}`);
+        const percLabel = document.getElementById(`perc-${i}`);
+        
+        if (visibleIndices.includes(i)) {
+            bar.style.height = '0%'; // сброс для старта анимации
+            setTimeout(() => {
+                bar.style.height = `${percentages[i]}%`;
+            }, 100);
+            percLabel.textContent = `${percentages[i]}%`;
+        } else {
+            bar.style.height = `0%`;
+            percLabel.textContent = `0%`;
+        }
+    }
+
+    audienceOverlay.style.display = "flex";
+};
+
+// Закрытие окна графика
+closeAudienceBtn.onclick = () => {
+    audienceOverlay.style.display = "none";
+};
