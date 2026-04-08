@@ -4,6 +4,8 @@ const soundBg = new Audio('bg.mp3');
 const soundCorrect = new Audio('correct.mp3');
 const soundWrong = new Audio('wrong.mp3');
 const soundOutro = new Audio('outro.mp3');
+const sound5050 = new Audio('50.mp3');
+const soundPhone = new Audio('phone.mp3');
 
 // Функция для остановки всех звуков, чтобы они не накладывались
 function stopAllSounds() {
@@ -12,6 +14,8 @@ function stopAllSounds() {
     soundCorrect.pause(); soundCorrect.currentTime = 0;
     soundWrong.pause(); soundWrong.currentTime = 0;
     soundOutro.pause(); soundOutro.currentTime = 0;
+    sound5050.pause(); sound5050.currentTime = 0;
+    soundPhone.pause(); soundPhone.currentTime = 0;
 }
 
 // База данных вопросов
@@ -231,7 +235,7 @@ btn5050.onclick = () => {
     
     btn5050.style.opacity = "0.3";
     btn5050.style.cursor = "not-allowed";
-
+    sound5050.play(); // <--- ДОБАВИТЬ ЭТУ СТРОКУ
     let wrongIndices = [];
     currentQuestionObj.options.forEach((opt, idx) => {
         if (opt !== currentQuestionObj.answer) {
@@ -252,7 +256,7 @@ btn5050.onclick = () => {
 btnPhone.onclick = () => {
     if (isPhoneUsed) return;
     isPhoneUsed = true;
-
+    soundPhone.play(); // <--- ДОБАВИТЬ ЭТУ СТРОКУ
     btnPhone.style.opacity = "0.3";
     btnPhone.style.cursor = "not-allowed";
 
