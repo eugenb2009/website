@@ -1,6 +1,20 @@
-alert("Начинаем игру №1!");
+// --- АУДИО ---
+const soundIntro = new Audio('intro.mp3');
+const soundBg = new Audio('bg.mp3');
+const soundCorrect = new Audio('correct.mp3');
+const soundWrong = new Audio('wrong.mp3');
+const soundOutro = new Audio('outro.mp3');
 
-// База данных вопросов (ваша JSON структура)
+// Функция для остановки всех звуков, чтобы они не накладывались
+function stopAllSounds() {
+    soundIntro.pause(); soundIntro.currentTime = 0;
+    soundBg.pause(); soundBg.currentTime = 0;
+    soundCorrect.pause(); soundCorrect.currentTime = 0;
+    soundWrong.pause(); soundWrong.currentTime = 0;
+    soundOutro.pause(); soundOutro.currentTime = 0;
+}
+
+// База данных вопросов
 const data = {
   "game_1": [
     {"question": "Сколько в комнате кошек, если в каждом из четырех углов сидит по кошке, а напротив каждой кошки сидит по кошке?", "options": ["12", "16", "4", "8"], "answer": "4"},
@@ -80,9 +94,19 @@ const btnAudience = document.getElementById("btn-audience");
 const audienceOverlay = document.getElementById("audience-overlay");
 const closeAudienceBtn = document.getElementById("close-audience");
 
-// Инициализация
-window.onload = () => {
-    startNewCycle();
+// Запуск игры по кнопке (для активации звука)
+document.getElementById("start-game-btn").onclick = () => {
+    document.getElementById("start-screen").style.display = "none";
+    
+    // Включаем интро
+    stopAllSounds();
+    soundIntro.play();
+    
+    // Ждем 3 секунды, пока играет интро, и начинаем
+    setTimeout(() => {
+        alert("Начинаем игру №1!");
+        startNewCycle();
+    }, 3000); 
 };
 
 function startNewCycle() {
@@ -91,19 +115,18 @@ function startNewCycle() {
 }
 
 function startNextGame() {
-    // Внутри function startNextGame() добавьте:
-    isAudienceUsed = false;
-    btnAudience.style.opacity = "1";
-    btnAudience.style.cursor = "pointer";
     currentQuestionIndex = 0;
     is5050Used = false;
     isPhoneUsed = false;
+    isAudienceUsed = false;
     
     // Сброс визуального состояния подсказок
     btn5050.style.opacity = "1";
     btn5050.style.cursor = "pointer";
     btnPhone.style.opacity = "1";
     btnPhone.style.cursor = "pointer";
+    btnAudience.style.opacity = "1";
+    btnAudience.style.cursor = "pointer";
 
     loadQuestion();
 }
@@ -114,28 +137,28 @@ function loadQuestion() {
     // Обновляем шкалу денег
     updateMoneyScale();
 
+    // Запускаем фоновую музыку
+    stopAllSounds();
+    soundBg.play();
+
     // Загружаем вопрос
     questionEl.textContent = currentQuestionObj.question;
 
     // Загружаем ответы
     answersEls.forEach((ansEl, index) => {
-        // Сброс стилей
         ansEl.classList.remove("correct", "wrong");
         ansEl.style.visibility = "visible";
         ansEl.style.pointerEvents = "auto";
         
-        // Установка текста
         const textSpan = ansEl.querySelector(".ans-text");
         textSpan.textContent = currentQuestionObj.options[index];
 
-        // Обработчик клика
         ansEl.onclick = () => checkAnswer(ansEl, currentQuestionObj.options[index]);
     });
 }
 
 function updateMoneyScale() {
     moneyScaleEls.forEach(el => el.classList.remove("active"));
-    // Индекс в массиве li идет в обратном порядке (от 15 до 1)
     const activeIndex = 14 - currentQuestionIndex; 
     moneyScaleEls[activeIndex].classList.add("active");
 }
@@ -143,25 +166,31 @@ function updateMoneyScale() {
 function checkAnswer(clickedEl, selectedText) {
     // Блокируем клики по остальным ответам
     answersEls.forEach(el => el.style.pointerEvents = "none");
+    
+    // Выключаем фоновую музыку перед проверкой
+    stopAllSounds();
 
     const isCorrect = (selectedText === currentQuestionObj.answer);
 
     if (isCorrect) {
         clickedEl.classList.add("correct");
+        soundCorrect.play(); // Звук верного ответа
         
         setTimeout(() => {
             currentQuestionIndex++;
             if (currentQuestionIndex > 14) {
+                stopAllSounds();
+                soundOutro.play();
                 alert(`Поздравляем! Вы выиграли МИЛЛИОН в игре!`);
                 advanceGameSequence();
             } else {
                 loadQuestion();
             }
-        }, 1500);
+        }, 3000); // 3 секунды на звук
     } else {
         clickedEl.classList.add("wrong");
+        soundWrong.play(); // Звук неверного ответа
         
-        // Найти и показать правильный ответ
         answersEls.forEach(el => {
             if (el.querySelector(".ans-text").textContent === currentQuestionObj.answer) {
                 el.classList.add("correct");
@@ -169,22 +198,23 @@ function checkAnswer(clickedEl, selectedText) {
         });
 
         setTimeout(() => {
+            stopAllSounds();
+            soundOutro.play(); // Музыка финала
             alert(`Увы, это неправильный ответ. Игра окончена.\nВаш несгораемый выигрыш: ${getSafeAmount()}`);
             advanceGameSequence();
-        }, 2000);
+        }, 4000); // 4 секунды
     }
 }
 
 function getSafeAmount() {
-    if (currentQuestionIndex >= 10) return "32 000"; // Если дошли до 11-го вопроса и проиграли
-    if (currentQuestionIndex >= 5) return "1 000";   // Если дошли до 6-го вопроса и проиграли
+    if (currentQuestionIndex >= 10) return "32 000";
+    if (currentQuestionIndex >= 5) return "1 000";
     return "0";
 }
 
 function advanceGameSequence() {
     currentGameIndex++;
     if (currentGameIndex >= 3) {
-        // Прошли все 3 игры, запрашиваем имя заново
         startNewCycle();
     } else {
         alert(`Начинаем игру №${currentGameIndex + 1}!`);
@@ -209,10 +239,8 @@ btn5050.onclick = () => {
         }
     });
 
-    // Перемешиваем неверные индексы и берем 2 из них
     wrongIndices.sort(() => Math.random() - 0.5);
     
-    // Скрываем два неверных ответа
     answersEls[wrongIndices[0]].style.visibility = "hidden";
     answersEls[wrongIndices[0]].style.pointerEvents = "none";
     
@@ -257,11 +285,9 @@ btnAudience.onclick = () => {
     if (isAudienceUsed) return;
     isAudienceUsed = true;
 
-    // Отключаем кнопку
     btnAudience.style.opacity = "0.3";
     btnAudience.style.cursor = "not-allowed";
 
-    // Узнаем, какие ответы сейчас видны (вдруг уже было 50:50)
     let visibleIndices = [];
     let correctIdx = -1;
     
@@ -274,33 +300,26 @@ btnAudience.onclick = () => {
         }
     });
 
-    // Расчет голосов
     let points = [0, 0, 0, 0];
     
     visibleIndices.forEach(idx => {
-        // Базовые случайные очки для всех видимых (от 10 до 50)
         points[idx] = Math.random() * 40 + 10;
     });
     
-    // Существенный, но не гарантированный бонус правильному ответу (от 40 до 70)
-    // Иногда неверный ответ может получить 50 баллов, а правильный (10+40)=50 — будет интрига!
     points[correctIdx] += 40 + Math.random() * 30; 
 
-    // Нормализуем в проценты (сумма = 100%)
     let totalPoints = points.reduce((a, b) => a + b, 0);
     let percentages = points.map(p => Math.round((p / totalPoints) * 100));
 
-    // Корректируем возможную погрешность округления (чтобы ровно 100%)
     let diff = 100 - percentages.reduce((a, b) => a + b, 0);
     percentages[correctIdx] += diff;
 
-    // Применяем к графику
     for (let i = 0; i < 4; i++) {
         const bar = document.getElementById(`bar-${i}`);
         const percLabel = document.getElementById(`perc-${i}`);
         
         if (visibleIndices.includes(i)) {
-            bar.style.height = '0%'; // сброс для старта анимации
+            bar.style.height = '0%'; 
             setTimeout(() => {
                 bar.style.height = `${percentages[i]}%`;
             }, 100);
@@ -314,7 +333,6 @@ btnAudience.onclick = () => {
     audienceOverlay.style.display = "flex";
 };
 
-// Закрытие окна графика
 closeAudienceBtn.onclick = () => {
     audienceOverlay.style.display = "none";
 };
